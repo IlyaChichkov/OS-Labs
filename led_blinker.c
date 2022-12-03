@@ -42,6 +42,8 @@
 #define LEDY 10
 #define LEDG 9
 //***************************//
+#define BUTTON0 22
+//***************************//
 #define VALUE_MAX 30
 
 void Exiting(int);
@@ -108,7 +110,29 @@ static int GPIODirection(int pin, int dir)
     return (0);
 }
 
+static int GPIORead(int pin)
+{
+#define VALUE_MAX 30
+	char path[VALUE_MAX];
+	char value_str[3];
+	int fd;
 
+	snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
+	fd = open(path, O_RDONLY);
+	if (-1 == fd) {
+		fprintf(stderr, "Failed to open gpio value for reading!\n");
+		Exiting(-1);
+	}
+
+	if (-1 == read(fd, value_str, 3)) {
+		fprintf(stderr, "Failed to read value!\n");
+		Exiting(-1);
+	}
+
+	close(fd);
+
+	return (atoi(value_str));
+}
 
 static int GPIOWrite(int pin, int value)
 {
@@ -116,7 +140,7 @@ static int GPIOWrite(int pin, int value)
 
     char path[VALUE_MAX];
     int fd;
-
+    
     snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
     fd = open(path, O_WRONLY);
     if (-1 == fd) {
@@ -138,6 +162,7 @@ void Exiting(int parameter)
     GPIOUnexport(LEDR);
     GPIOUnexport(LEDY);
     GPIOUnexport(LEDG);
+    GPIOUnexport(BUTTON0);
     exit(parameter);
 }
 
@@ -146,6 +171,7 @@ void Exiting_sig()
     GPIOUnexport(LEDR);
     GPIOUnexport(LEDY);
     GPIOUnexport(LEDG);
+    GPIOUnexport(BUTTON0);
     exit(0);
 }
 
@@ -188,9 +214,11 @@ int main(int argc, char *argv[])
     GPIOExport(LEDR);
     GPIOExport(LEDY);
     GPIOExport(LEDG);
+    GPIOExport(BUTTON0);
     GPIODirection(LEDR, OUT);
     GPIODirection(LEDY, OUT);
     GPIODirection(LEDG, OUT);
+    GPIODirection(BUTTON0, OUT);
 
     sleep(0.5);
 
@@ -203,7 +231,19 @@ int main(int argc, char *argv[])
 
     // printf("Time: %d:%d:%02d", tmbuf->tm_hour + 3, tmbuf->tm_min, tmbuf->tm_sec);
 
+    int bt = 0;
     while (1) {
+        bt = GPIORead(BUTTON0);
+        printf("bt: %d", bt);
+        if(bt == 1){
+            printf("BUTTON_0");
+        }else{
+            printf("NONE");
+        }
+        
+        fflush(stdout);
+        usleep(delay);
+        /*
         GPIOWrite(LEDR, 1);
         GPIOWrite(LEDY, 0);
         GPIOWrite(LEDG, 0);
@@ -221,7 +261,7 @@ int main(int argc, char *argv[])
         GPIOWrite(LEDG, 1);
         printf("Light:G\n");
         fflush(stdout);
-        usleep(delay);
+        usleep(delay);*/
     }
     return 0;
 }
