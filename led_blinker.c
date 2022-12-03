@@ -49,169 +49,179 @@ void Exiting(int);
 static int GPIOExport(int pin)
 {
 #define BUFFER_MAX 3
-	char buffer[BUFFER_MAX];
-	ssize_t bytes_written;
-	int fd;
+    char buffer[BUFFER_MAX];
+    ssize_t bytes_written;
+    int fd;
 
-	fd = open("/sys/class/gpio/export", O_WRONLY);
-	if (-1 == fd) {
-		fprintf(stderr, "Failed to open export for writing!\n");
-		Exiting(-1);
-	}
+    fd = open("/sys/class/gpio/export", O_WRONLY);
+    if (-1 == fd) {
+        fprintf(stderr, "Failed to open export for writing!\n");
+        Exiting(-1);
+    }
 
-	bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
-	write(fd, buffer, bytes_written);
-	close(fd);
-	return (0);
+    bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
+    write(fd, buffer, bytes_written);
+    close(fd);
+    return (0);
 }
 
 static int GPIOUnexport(int pin)
 {
-	char buffer[BUFFER_MAX];
-	ssize_t bytes_written;
-	int fd;
+    char buffer[BUFFER_MAX];
+    ssize_t bytes_written;
+    int fd;
 
-	fd = open("/sys/class/gpio/unexport", O_WRONLY);
-	if (-1 == fd) {
-		fprintf(stderr, "Failed to open unexport for writing!\n");
-		Exiting(-1);
-	}
+    fd = open("/sys/class/gpio/unexport", O_WRONLY);
+    if (-1 == fd) {
+        fprintf(stderr, "Failed to open unexport for writing!\n");
+        Exiting(-1);
+    }
 
-	bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
-	write(fd, buffer, bytes_written);
-	close(fd);
-	return (0);
+    bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
+    write(fd, buffer, bytes_written);
+    close(fd);
+    return (0);
 }
 
 static int GPIODirection(int pin, int dir)
 {
-	static const char s_directions_str[] = "in\0out";
+    static const char s_directions_str[] = "in\0out";
 
 #define DIRECTION_MAX 35
-	char path[DIRECTION_MAX];
-	int fd;
+    char path[DIRECTION_MAX];
+    int fd;
 
-	snprintf(path, DIRECTION_MAX, "/sys/class/gpio/gpio%d/direction", pin);
-	fd = open(path, O_WRONLY);
-	if (-1 == fd) {
-		fprintf(stderr, "Failed to open gpio direction for writing!\n");
-		Exiting(-1);
-	}
+    snprintf(path, DIRECTION_MAX, "/sys/class/gpio/gpio%d/direction", pin);
+    fd = open(path, O_WRONLY);
+    if (-1 == fd) {
+        fprintf(stderr, "Failed to open gpio direction for writing!\n");
+        Exiting(-1);
+    }
 
-	if (-1 == write(fd, &s_directions_str[IN == dir ? 0 : 3],
-			IN == dir ? 2 : 3)) {
-		fprintf(stderr, "Failed to set direction!\n");
-		Exiting(-1);
-	}
+    if (-1 == write(fd, &s_directions_str[IN == dir ? 0 : 3],
+                    IN == dir ? 2 : 3)) {
+        fprintf(stderr, "Failed to set direction!\n");
+        Exiting(-1);
+    }
 
-	close(fd);
-	return (0);
+    close(fd);
+    return (0);
 }
 
 
 
 static int GPIOWrite(int pin, int value)
 {
-	static const char s_values_str[] = "01";
+    static const char s_values_str[] = "01";
 
-	char path[VALUE_MAX];
-	int fd;
+    char path[VALUE_MAX];
+    int fd;
 
-	snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
-	fd = open(path, O_WRONLY);
-	if (-1 == fd) {
-		fprintf(stderr, "Failed to open gpio value for writing!\n");
-		Exiting(-1);
-	}
+    snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
+    fd = open(path, O_WRONLY);
+    if (-1 == fd) {
+        fprintf(stderr, "Failed to open gpio value for writing!\n");
+        Exiting(-1);
+    }
 
-	if (1 != write(fd, &s_values_str[LOW == value ? 0 : 1], 1)) {
-		fprintf(stderr, "Failed to write value!\n");
-		Exiting(-1);
-	}
+    if (1 != write(fd, &s_values_str[LOW == value ? 0 : 1], 1)) {
+        fprintf(stderr, "Failed to write value!\n");
+        Exiting(-1);
+    }
 
-	close(fd);
-	return (0);
+    close(fd);
+    return (0);
 }
 
 void Exiting(int parameter)
 {
-	GPIOUnexport(LEDR);
-	GPIOUnexport(LEDY);
-	GPIOUnexport(LEDG);
-	exit(parameter);
+    GPIOUnexport(LEDR);
+    GPIOUnexport(LEDY);
+    GPIOUnexport(LEDG);
+    exit(parameter);
 }
 
 void Exiting_sig()
 {
-	GPIOUnexport(LEDR);
-	GPIOUnexport(LEDY);
-	GPIOUnexport(LEDG);
-	exit(0);
+    GPIOUnexport(LEDR);
+    GPIOUnexport(LEDY);
+    GPIOUnexport(LEDG);
+    exit(0);
 }
 
 void help()
 {
-	printf("    Use this application for blinking\n");
-	printf("    execute format: ./led_blinking [-h][-q] TIME \n");
-	printf("    return: color light\n");
-	printf("    TIME - pause between blinks in sec\n");
-	printf("    -h - help\n");
-	printf("    -q - quiet\n");
+    printf("    Use this application for blinking\n");
+    printf("    execute format: ./led_blinking [-h][-q] TIME \n");
+    printf("    return: color light\n");
+    printf("    TIME - pause between blinks in sec\n");
+    printf("    -h - help\n");
+    printf("    -q - quiet\n");
 }
 
 int main(int argc, char *argv[])
 {
-	int quiet = 0;
-	if (argc > 1) {
-		if ((strcmp(argv[1], "-h") == 0)) {
-			help();
-			return 0;
-		} else {
-			if ((strcmp(argv[1], "-q") == 0)) {
-				quiet = 1;
-			}
-		}
-	}
+    int quiet = 0;
+    if (argc > 1) {
+        if ((strcmp(argv[1], "-h") == 0)) {
+            help();
+            return 0;
+        } else {
+            if ((strcmp(argv[1], "-q") == 0)) {
+                quiet = 1;
+            }
+        }
+    }
 
-	if ((quiet && argc != 3) || (!quiet && argc != 2)) {
-		help();
-		return 0;
-	}
+    if ((quiet && argc != 3) || (!quiet && argc != 2)) {
+        help();
+        return 0;
+    }
 
-	if (!quiet)
-		printf("\nThe led blinker application was started\n\n");
-	int argument = 1;
-	if (quiet)
-		argument++;
-	double delay = atof(argv[argument]) * 1000000;
-	signal(SIGINT, Exiting_sig);
-	GPIOExport(LEDR);
-	GPIOExport(LEDY);
-	GPIOExport(LEDG);
-	GPIODirection(LEDR, OUT);
-	GPIODirection(LEDY, OUT);
-	GPIODirection(LEDG, OUT);
+    if (!quiet)
+        printf("\nThe led blinker application was started\n\n");
+    int argument = 1;
+    if (quiet)
+        argument++;
+    double delay = atof(argv[argument]) * 1000000;
+    signal(SIGINT, Exiting_sig);
+    GPIOExport(LEDR);
+    GPIOExport(LEDY);
+    GPIOExport(LEDG);
+    GPIODirection(LEDR, OUT);
+    GPIODirection(LEDY, OUT);
+    GPIODirection(LEDG, OUT);
 
-	sleep(0.5);
-	while (1) {
-		GPIOWrite(LEDR, 1);
-		GPIOWrite(LEDY, 0);
-		GPIOWrite(LEDG, 0);
-		printf("Light:R\n");
-		fflush(stdout);
-		usleep(delay);
-		GPIOWrite(LEDR, 0);
-		GPIOWrite(LEDY, 1);
-		GPIOWrite(LEDG, 0);
-		printf("Light:Y\n");
-		fflush(stdout);
-		usleep(delay);
-		GPIOWrite(LEDR, 0);
-		GPIOWrite(LEDY, 0);
-		GPIOWrite(LEDG, 1);
-		printf("Light:G\n");
-		fflush(stdout);
-		usleep(delay);
-	}
-	return 0;
+    sleep(0.5);
+
+    // Get current time
+    //struct timespec mtime;
+    //struct tm *tmbuf;
+
+    //clock_gettime(CLOCK_REALTIME, &mtime);
+    //tmbuf = gmtime(&mtime.tv_sec);
+
+    // printf("Time: %d:%d:%02d", tmbuf->tm_hour + 3, tmbuf->tm_min, tmbuf->tm_sec);
+
+    while (1) {
+        GPIOWrite(LEDR, 1);
+        GPIOWrite(LEDY, 0);
+        GPIOWrite(LEDG, 0);
+        printf("Light:R\n");
+        fflush(stdout);
+        usleep(delay);
+        GPIOWrite(LEDR, 0);
+        GPIOWrite(LEDY, 1);
+        GPIOWrite(LEDG, 0);
+        printf("Light:Y\n");
+        fflush(stdout);
+        usleep(delay);
+        GPIOWrite(LEDR, 0);
+        GPIOWrite(LEDY, 0);
+        GPIOWrite(LEDG, 1);
+        printf("Light:G\n");
+        fflush(stdout);
+        usleep(delay);
+    }
+    return 0;
 }
