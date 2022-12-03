@@ -1,12 +1,25 @@
 #!/bin/bash
-exec 3<>gp2
-exec 4<>hcs
+exec 3<>color_data
+exec 4<>color_bl
 while :
 do
-read -u 3 linegp2  
-read -u 4 linehcs 
-Lgp2=$(bc -l<<<"scale=4;(61.3899*e(1.1076*l(1000/($linegp2*0.1875))))")
-Lhcs=$(bc -l<<<"scale=4;$linehcs*340/2*100")
-echo gp2:$Lgp2 cm >> result.txt
-echo hcs:$Lhcs cm >> result.txt
+read -u 3 sensor
+read -u 4 led
+
+sensor_list=($sensor)
+
+echo "--- new data ---" >> result.txt
+
+if [[ ${sensor_list[1]} -gt ${sensor_list[2]} ]] && [[ ${sensor_list[1]} -gt ${sensor_list[3]} ]]
+then
+echo "R" >> result.txt
+elif [[ ${sensor_list[2]} -gt ${sensor_list[1]} ]] && [[ ${sensor_list[2]} -gt ${sensor_list[3]} ]]
+then
+echo "G" >> result.txt
+else
+echo "B" >> result.txt
+fi
+
+echo led >> result.txt
+echo "----------------" >> result.txt
 done
