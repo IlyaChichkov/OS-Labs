@@ -1,54 +1,56 @@
-# Операционные системы | Светофор ![](https://progress-bar.dev/40/?title=done)
+# Operating Systems | Traffic Light ![](https://progress-bar.dev/50/?title=done)
 
-## Содержимое
+## Content
 
-- [Общее представление](#общее-представление)
-    - [Описание задания](#описание-задания)
-    - [Схема](#схема-работы-встраиваемой-системы)
-    - [Требования к работе](#требования-к-работе)
-- [Текущий прогресс](#текущий-прогресс)
-  - [Чему я научился](#чему-я-научился)
-  - [Используемое ПО и оборудование](#используемое-по-и-оборудование)
-  - [Автор](#автор)
+- [General view](#general-view)
+- [Task description](#task-description)
+- [Scheme](#scheme)
+- [Job requirements](#job-requirements)
+- [Current progress](#current-progress)
+- [What I learned](#what-i-learned)
+- [Software and hardware used](#software-and-hardware-used) -
+[Author](#author)
 
-## Общее представление
+## General view
 
-### Описание задания:  
-Разработан прототип встраиваемой системы, а именно совокупность программного обеспечения и стенда на базе Raspberry Pi4, которая позволяет управлять переключением светофора по расписанию (тремя светодиодами), а также считывать цвет с помощью соответствующего сенсора (Color Sensor TCS34725). Результаты распознанных цветов  выводяться в терминале персонального компьютера, подключенного к встраиваемой системе через ssh-соединение.   
+### Task Description:
+A prototype of an embedded system has been developed, namely a combination of software and a stand based on Raspberry Pi4, which allows you to control the switching of traffic lights according to a schedule (three LEDs), as well as to read the color using the corresponding sensor (Color Sensor TCS34725). The results of the recognized colors are displayed in the terminal of a personal computer connected to the embedded system via an ssh connection.
 
-### Схема работы встраиваемой системы:
-![Схема варианта 3](project_scheme.png)
+### Scheme
+The scheme of the embedded system:
 
-### Требования к работе
-1. Встраиваемая система должна обеспечивать управление тремя светодиодами в режиме светофора и определение свечения цвета, вывод данной информации за счет выполнения трех основных программ: 1 – программа, управляющая светодиодами и опросом кнопок отладочного стенда, 2 – программа, принимающая сигналы с датчика цвета по I2C интерфейсу, 3 – программа, получающая данные от программ 1 и 2 по одному из способов межпроцессного взаимодействия (именованные и неименованные каналы) и выводящяя результат работы светофора и определенного цвета в терминал персонального компьютера, подключенного к встраиваемой системе через ssh-соединение.
-2. Программа-1 должна обеспечивать взаимодействие RPi 4 со светодиодами и кнопками с помощью GPIO, работает в многопоточном режиме и выполняют следующие функции:
-* настройка режима работы светофора (времена переключения) по аргументу при старте или через команду по не именованным каналам;
-* чтение значений кнопки BUTTON0 для ускорения переключения;
-* выдача данных о светящемся светодиоде с временной меткой системы;
-* прием команд остановки и старта работы по именованным каналам;
-3. Программа-2 должна обеспечивать взаимодействие RPi 4 с датчиком цвета по интерфейсу I2C, работает в многопоточном режиме и выполняют следующие функции:
-* запись и чтение значений регистров датчика цвета;
-* преобразование данных датчика в значение цвета из трех возможных и их комбинации/отсутствия света;
-* отправка сигнала о смене цвета или отсутствии данных с временной меткой системы по именованным каналам.
-4. Программа-3 должна обеспечивать взаимодействие с программами-1,-2, стандартным потоком вводом/вывода, работает в многопоточном режиме, а также выполняет следующие функции:
-* обмен сообщениям по именованным/не именованным каналам с приложениями-1,-2;
-* обмен сообщениями со стандартным потоком ввода/вывода, в том числе прием команд от пользователя (start, stop, change_color).
-5. Встраиваемая система должна обеспечивать выдачу результатов работы на консоль в следующем формате:
-* «время измерения» (hh:mm:ss) 
-* «режим работы светофора - … », 
-* «измеренный цвет - …», ("красный", "зеленый", "синий", "нет света", "сочетание цветов").
+![Scheme of option 3](project_scheme.png)
 
-## Текущий прогресс
+### Job Requirements
+1. The embedded system must provide control of three LEDs in the traffic light mode and the determination of the color glow, the output of this information by executing three main programs: 1 – a program that controls the LEDs and polling the buttons of the debugging stand, 2 – a program that receives signals from the color sensor via the I2C interface, 3 – a program that receives data from programs 1 and 2 using one of the methods of interprocess communication (named and unnamed channels) and outputs the result of the operation of a traffic light and a certain color to the terminal of a personal computer connected to the embedded system via ssh connection.
+2. The program-1 must ensure the interaction of RPi 4 with LEDs and buttons using GPIO, works in multithreaded mode and performs the following functions:
+* setting the traffic light operation mode (switching times) by argument at start or through a command on unnamed channels;
+* reading BUTTON0 button values to speed up switching;
+* output of data on a glowing LED with a time stamp of the system;
+* receiving commands to stop and start work on named channels;
+3. The program-2 must ensure the interaction of RPi 4 with the color sensor via the I2C interface, works in multithreaded mode and performs the following functions:
+* write and read values of color sensor registers;
+* conversion of sensor data into a color value of three possible and their combination/absence of light;
+* sending a signal about a color change or the absence of data with a timestamp of the system via named channels.
+4. Program-3 must provide interaction with programs-1, -2, standard input/output stream, works in multithreaded mode, and also performs the following functions:
+* exchange of messages via named/unnamed channels with applications-1,-2;
+* messaging with a standard input/output stream, including receiving commands from the user (start, stop, change_color).
+5. The embedded system must provide output of the results of work to the console in the following format:
+* "measurement time" (hh:mm:ss)
+* "traffic light operating mode - ... ",
+* "measured color is ...", ("red", "green", "blue", "no light", "color combination").
 
-### Чему я научился
+## Current progress
 
-### Используемое ПО и оборудование
+### What I learned
 
-__Программное обеспечение__
+### Software and hardware used
 
-__Перечень используемого оборудования:__
-* микрокомпьютер Raspberry Pi 4;
-* отладочная плата OS с подключенными: светодиодами и кнопками, датчика цвета (Color Sensor TCS34725);
-* персональный компьютер c установленным ПО (Putty, WinSCP, Git).
+__Software__
 
-### Автор
+__The list of equipment used:__
+* Raspberry Pi 4 microcomputer;
+* OS debugging board with connected: LEDs and buttons, color sensor (Color Sensor TCS34725);
+* a personal computer with installed software (Putty, WinSCP, Git).
+
+### Author
